@@ -1,0 +1,242 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class Node
+{
+    public:
+    int key;
+    Node *left;
+    Node *right;
+    int height;
+};
+
+int max(int a , int b)
+{
+    return a>b?a:b;
+}
+
+int height(Node* N)
+{
+    if(N == NULL)
+    {
+        return 0;
+    }
+    return N->height;
+}
+
+Node * newNode(int key)
+{
+    Node* node = new Node();
+    node->key = key;
+    node->left = NULL;
+    node->right = NULL;
+    node->height = 1;
+    
+    return node;
+}
+
+Node* leftRotate(Node *a)
+{
+    Node* temp = a->right;
+    Node* Bleft = temp->left;
+    
+    temp->left = a;
+    a->right = Bleft;
+    
+    a->height = max(height(a->left),height(a->right))+1;
+    temp->height = max(height(temp->left),height(temp->right))+1;
+    
+    return temp;
+    
+}
+
+Node* rightRotate(Node *a)
+{
+    Node *b = a->left;
+    Node *Bright = b->right;
+    
+    b->right = a;
+    a->left = Bright;
+    
+    b->height = max(height(b->left),height(b->right))+1;
+    a->height = max(height(a->left),height(a->right))+1;
+    
+    return b;
+}
+
+
+int getBalance(Node *a)
+{
+    if( a== NULL)
+    {
+        return 0;
+    }
+    return (height(a->left)-height(a->right));
+}
+
+
+void preorder(Node * node)
+{
+    if(node != NULL)
+    {
+        cout<< node->key << " ";
+        preorder(node->left);
+        preorder(node->right);
+    }
+}
+
+Node* insert(Node *root , int key)
+{
+   // preorder(root);
+    if(root == NULL )
+    {
+      //  cout<<"inserting key:"<<key<<endl;
+        
+        return (newNode(key));
+    }
+    
+    if(key > root->key)
+    {
+        root->right = insert(root->right , key);
+      //  cout<<"going to right"<<endl;
+    }
+    else if(key < root->key)
+    {
+        root->left = insert(root->left , key);
+      //  cout<<"going to left"<<endl;
+    }
+    else
+    {
+        return root;
+    }
+    
+    root->height = 1+max(height(root->left),height(root->right));
+    
+    int balance = getBalance(root);
+    
+    if(balance >1 && key < root->left->key)
+    {
+        return rightRotate(root);
+    }
+    if(balance > 1  && key > root->left->key)
+    {
+        root->left = leftRotate(root->left);
+        return rightRotate(root);
+    }
+    if(balance < -1 && key > root->right->key)
+    {
+        return leftRotate(root);
+    }
+    if(balance < -1 && key < root->right->key)
+    {
+        root->right = rightRotate(root->right);
+        return leftRotate(root);
+    }
+    
+  //  cout<<"Inserted key:"<<key<<endl;
+    return root;
+
+}
+
+
+
+Node * minVal(Node * node)
+{
+    while(node->left != NULL)
+    {
+        node =node->left;
+    }
+    
+    return node;
+}
+
+Node* deleteNode(Node* root ,int key)
+{
+    if(root == NULL)
+    {
+        return  NULL;
+    }
+    if(key < root->key)
+    {
+        root->left = deleteNode(root->left , key);
+        
+    }
+    
+    else if ( key > root->key)
+    {
+        root->right = deleteNode(root->right , key);
+    }
+    else{
+        if((root->left == NULL)||(root->right == NULL))
+        {
+            Node * temp = root->left?root->left:root->right;
+            
+            if(temp == NULL)
+            {
+                temp = root;
+                root = NULL;
+            }
+            else
+            *root = *temp;
+            
+            free(temp);
+        }
+        else{
+            Node* temp = minVal(root->right);
+            root->key = temp->key;
+            root->right = deleteNode(root->right , temp->key);
+        }
+        }
+        
+        if(root == NULL)
+        {
+            return root;
+        }
+        
+        root->height = 1+max(height(root->left),height(root->right));
+        
+        int balance = getBalance(root);
+        if(balance >1 && key < root->left->key)
+    {
+        return rightRotate(root);
+    }
+    if(balance > 1  && key > root->left->key)
+    {
+        root->left = leftRotate(root->left);
+        return rightRotate(root);
+    }
+    if(balance < -1 && key > root->right->key)
+    {
+        return leftRotate(root);
+    }
+    if(balance < -1 && key < root->right->key)
+    {
+        root->right = rightRotate(root->right);
+        return leftRotate(root);
+    }
+return root;
+    }
+    
+    
+    int main()
+    {
+        Node *root = NULL;
+        cout<<"Inserted values:"<<endl;
+        
+        root = insert(root , 10);
+        root = insert(root , 20);
+         root = insert(root , 30);
+        root =   insert(root , 40);
+           root = insert(root , 50);
+           root =  insert(root , 60);
+             root = insert(root , 70);
+              root = insert(root , 80);
+              preorder(root);
+              
+              cout<<"deletion of 20"<<endl;
+              deleteNode(root , 20);
+              
+               
+               preorder(root);
+    }
+
